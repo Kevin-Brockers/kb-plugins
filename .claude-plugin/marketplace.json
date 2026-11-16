@@ -1,0 +1,22 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "kb-plugins",
+  "description": "Kevin Brockers' personal Claude Code plugins",
+  "owner": {
+    "name": "Kevin-Brockers"
+  },
+  "plugins": [
+    {
+      "name": "kb-workflow",
+      "description": "Shared working rules, a guard hook (git/gh rules, destructive commands, secrets, session IDs) and workflow skills for roadmap, branches, changelog, PRs and releases",
+      "source": "./plugins/kb-workflow",
+      "category": "productivity"
+    },
+    {
+      "name": "kb-python",
+      "description": "Python project conventions (uv, ruff, pytest, CI, releases) and a check skill",
+      "source": "./plugins/kb-python",
+      "category": "development"
+    }
+  ]
+}

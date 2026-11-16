@@ -1,0 +1,26 @@
+{
+  "description": "Inject the kb-workflow core rules at session start and guard Bash and file edits: git/gh workflow rules, destructive commands, secrets",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cat \"${CLAUDE_PLUGIN_ROOT}/hooks/core-rules.md\""
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -I -B \"${CLAUDE_PLUGIN_ROOT}/hooks/guard.py\""
+          }
+        ]
+      }
+    ]
+  }
+}

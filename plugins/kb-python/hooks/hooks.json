@@ -1,0 +1,15 @@
+{
+  "description": "Inject the kb-python conventions at session start when the project has a pyproject.toml",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -f \"${CLAUDE_PROJECT_DIR:-$PWD}/pyproject.toml\" ]; then cat \"${CLAUDE_PLUGIN_ROOT}/hooks/python-rules.md\"; fi"
+          }
+        ]
+      }
+    ]
+  }
+}
