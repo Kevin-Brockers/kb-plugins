@@ -1,8 +1,6 @@
 # kb-plugins
 
-My personal Claude Code plugin marketplace (`kb-plugins`). It replaces the
-symlink setup from `kb-dotclaude`: install a plugin once and its rules and
-skills are available in every project.
+My personal Claude Code plugin marketplace (`kb-plugins`).
 
 ## Plugins
 
