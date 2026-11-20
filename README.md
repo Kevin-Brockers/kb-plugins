@@ -135,11 +135,20 @@ directory. Results go to `plugins/<plugin>/evals/results/` (gitignored).
 
 ### Pre-commit hook
 
-[`.pre-commit-config.yaml`](.pre-commit-config.yaml) has two local hooks.
+[`.pre-commit-config.yaml`](.pre-commit-config.yaml) has three local hooks.
 Install them with `prek install` (or `pre-commit install`):
 
 - `plugin-validate` runs `claude plugin validate` on the marketplace and
   every plugin when anything under `.claude-plugin/` or `plugins/` changes.
+- `plugin-version-bump`
+  ([`scripts/check-version-bump.sh`](scripts/check-version-bump.sh)) fails
+  when a commit changes a plugin's `skills/`, `agents/` or `hooks/` (deletions
+  included) but its `plugin.json` version isn't one step above the version
+  on `origin/main` (patch, minor or major: `0.1.0` → `0.1.1`, `0.2.0` or
+  `1.0.0`). It compares with the merge-base of `HEAD` and `origin/main`, so a
+  branch needs one bump per plugin, not one per commit. Set
+  `KB_VERSION_BASE=HEAD` to compare with the last commit instead. New plugins
+  are skipped.
 - `plugin-evals` ([`scripts/eval-changed.sh`](scripts/eval-changed.sh))
   runs the evals of each staged skill or agent: a change in
   `skills/<name>/`, `agents/<name>.md` or `evals/<name>/` runs

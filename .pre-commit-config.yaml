@@ -7,6 +7,15 @@ repos:
         language: system
         files: ^(\.claude-plugin/|plugins/)
         pass_filenames: false
+      # Changed skills, agents or hooks need a one-step version bump in the
+      # plugin's plugin.json (see the script header for the base ref).
+      - id: plugin-version-bump
+        name: plugin version bumped for changed skills, agents and hooks
+        entry: scripts/check-version-bump.sh
+        language: system
+        # always_run: a commit that only deletes files gets no file list.
+        always_run: true
+        pass_filenames: false
       # Runs the evals of each changed skill or agent (see the script header
       # for the path -> eval mapping and the KB_EVALS_* overrides).
       - id: plugin-evals
