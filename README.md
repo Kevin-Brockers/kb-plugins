@@ -133,6 +133,28 @@ directory. Results go to `plugins/<plugin>/evals/results/` (gitignored).
 - **Cost**: every case runs 3 times in each arm. Use `--tag`, `--case` or
   `--runs 1` while working on one skill.
 
+### Pre-commit hook
+
+[`.pre-commit-config.yaml`](.pre-commit-config.yaml) has two local hooks.
+Install them with `prek install` (or `pre-commit install`):
+
+- `plugin-validate` runs `claude plugin validate` on the marketplace and
+  every plugin when anything under `.claude-plugin/` or `plugins/` changes.
+- `plugin-evals` ([`scripts/eval-changed.sh`](scripts/eval-changed.sh))
+  runs the evals of each staged skill or agent: a change in
+  `skills/<name>/`, `agents/<name>.md` or `evals/<name>/` runs
+  `--tag <name>`, and a change in `hooks/`, `evals/_lib/` or
+  `.claude-plugin/` runs the plugin's whole suite. A changed skill or
+  agent without an eval suite gets a warning.
+
+To keep commits fast, the hook runs 1 run per case, without the baseline
+arm, 4 at a time, keeps the report local, and fails if a case scores below
+0.8. Change this with `KB_EVALS_RUNS`, `KB_EVALS_ABLATION`,
+`KB_EVALS_CONCURRENCY` and `KB_EVALS_THRESHOLD`. See what it would run with
+`KB_EVALS_DRY_RUN=1`. Skip it for one commit with
+`SKIP=plugin-evals git commit …`. Like the evals, the hook needs git from
+Homebrew on macOS.
+
 ## License
 
 [MIT](LICENSE)

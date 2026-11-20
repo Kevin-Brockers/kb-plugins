@@ -1,0 +1,18 @@
+repos:
+  - repo: local
+    hooks:
+      - id: plugin-validate
+        name: claude plugin validate
+        entry: bash -c 'claude plugin validate . && for p in plugins/*/; do claude plugin validate "$p" || exit 1; done'
+        language: system
+        files: ^(\.claude-plugin/|plugins/)
+        pass_filenames: false
+      # Runs the evals of each changed skill or agent (see the script header
+      # for the path -> eval mapping and the KB_EVALS_* overrides).
+      - id: plugin-evals
+        name: plugin evals for changed skills and agents
+        entry: scripts/eval-changed.sh
+        language: system
+        files: ^plugins/[^/]+/(skills|agents|hooks|evals|\.claude-plugin)/
+        exclude: ^plugins/[^/]+/evals/results/
+        require_serial: true
