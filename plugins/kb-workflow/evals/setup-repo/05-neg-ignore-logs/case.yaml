@@ -1,0 +1,36 @@
+schema_version: "1.1"
+name: setup-repo-neg-ignore-logs
+description: A small .gitignore change in a set-up repo; setup-repo should not fire.
+tags: [setup-repo, negative]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: Add *.log to the .gitignore.
+  max_turns: 8
+  timeout_seconds: 180
+  allowed_tools: [Read, Glob, Grep, Skill, Bash, Edit, Write]
+graders:
+  - name: skill-not-fired
+    type: tool_used
+    tool: Skill
+    input_match: setup-repo
+    min: 0
+    max: 0
+    arm: both
+  - name: adds-pattern
+    type: regex
+    target: {source: file, path: .gitignore}
+    flags: m
+    pattern: '^\*\.log$'
+  - name: keeps-existing
+    type: regex
+    target: {source: file, path: .gitignore}
+    flags: m
+    pattern: '^!\.env\.example$'
+  - name: no-setup-commands
+    type: tool_used
+    tool: Bash
+    input_match: 'git (init|branch dev)|prek|gh repo'
+    min: 0
+    max: 0
+    arm: both

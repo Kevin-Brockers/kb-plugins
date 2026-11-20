@@ -1,0 +1,54 @@
+schema_version: "1.1"
+name: sync-dev-after-merge
+description: After merges on GitHub; delete merged branches with -d, keep the squash-merged and unmerged ones.
+tags: [sync-dev, fire]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: My pull request was just merged on GitHub. Sync me up.
+  max_turns: 30
+  timeout_seconds: 600
+  allowed_tools: [Read, Glob, Grep, Skill, Bash]
+graders:
+  - name: skill-fired
+    type: tool_used
+    tool: Skill
+    input_match: sync-dev
+  - name: fetch-prune
+    type: tool_used
+    tool: Bash
+    input_match: 'git fetch[^"]*(--prune|-p\b)'
+  - name: fast-forward-only
+    type: tool_used
+    tool: Bash
+    input_match: 'git (pull|merge)[^"]*--ff-only'
+  - name: deletes-merged-branch
+    type: tool_used
+    tool: Bash
+    input_match: 'git branch (-d|--delete) [^"]*feature/json_store'
+  - name: deletes-empty-branch
+    type: tool_used
+    tool: Bash
+    input_match: 'git branch (-d|--delete) [^"]*feature/empty'
+  - name: keeps-unmerged-branches
+    type: tool_used
+    tool: Bash
+    input_match: 'git branch [^"]*-[dD][^"]*feature/(priorities|wip)'
+    min: 0
+    max: 0
+    arm: both
+  - name: never-forces-resets-or-pushes
+    type: tool_used
+    tool: Bash
+    input_match: 'git branch [^"]*(-D|--force|-f)\b|git reset|git push'
+    min: 0
+    max: 0
+    arm: both
+  - name: summary
+    type: llm
+    criteria: |
+      Ground truth after a correct run: dev is at "Add priorities (#5)"; feature/json_store (merged) and feature/empty (no commits of its own) were deleted; feature/priorities was kept, has 1 commit not in dev and its upstream is gone (likely a squash merge); feature/wip was kept with 2 commits not in dev. Pass only if all hold:
+      1. The summary names the commit dev is now at (Add priorities (#5)).
+      2. It lists feature/json_store and feature/empty as deleted, and says feature/empty had no commits of its own.
+      3. It says feature/priorities was kept because its upstream is gone but it has a commit not in dev, and asks the maintainer about it (e.g. squash merge).
+      4. It says feature/wip was kept with 2 commits not in dev.

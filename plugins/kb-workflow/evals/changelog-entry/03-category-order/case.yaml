@@ -1,0 +1,26 @@
+schema_version: "1.1"
+name: changelog-entry-category-order
+description: A removal needs "### Removed" between the existing Added and Fixed sections.
+tags: [changelog-entry, fire]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: This branch removes the old `todo.py export --csv` option. Add a changelog entry.
+  max_turns: 15
+  timeout_seconds: 300
+  allowed_tools: [Read, Glob, Grep, Skill, Bash, Edit, Write]
+graders:
+  - name: skill-fired
+    type: tool_used
+    tool: Skill
+    input_match: changelog-entry
+  - name: removed-between-added-and-fixed
+    type: regex
+    target: {source: file, path: CHANGELOG.md}
+    flags: mi
+    pattern: '^## \[Unreleased\]\n(?:(?!^## )[\s\S])*?^### Added\n(?:(?!^## )[\s\S])*?^### Removed\n\n?- #TBD - .*csv(?:(?!^## )[\s\S])*?^### Fixed\n'
+  - name: no-invented-links
+    type: regex
+    target: {source: file, path: CHANGELOG.md}
+    pattern: '/pull/'
+    match: 'count:2'

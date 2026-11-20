@@ -1,0 +1,30 @@
+schema_version: "1.1"
+name: check-unfixable-lint
+description: An undefined name (F821) that ruff can't auto-fix; report the message, still run the rest.
+tags: [check, fire]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: Run the checks on this project.
+  max_turns: 20
+  timeout_seconds: 450
+  allowed_tools: [Read, Glob, Grep, Skill, Bash]
+graders:
+  - name: skill-fired
+    type: tool_used
+    tool: Skill
+    input_match: kb-python:check
+  - name: runs-all-three
+    type: tool_order
+    before: {tool: Bash, input_match: 'ruff format(?! --check)'}
+    after: {tool: Bash, input_match: 'pytest'}
+  - name: names-rule
+    type: regex
+    pattern: 'F821|[Uu]ndefined name'
+  - name: report
+    type: llm
+    criteria: |
+      Pass only if all hold:
+      1. It reports that ruff check failed with an undefined name `total` (F821) in calc.py, in the mean function (a line number is fine).
+      2. It reports the results of ruff format and pytest (pytest passed, 2 tests).
+      3. It doesn't claim everything passed.

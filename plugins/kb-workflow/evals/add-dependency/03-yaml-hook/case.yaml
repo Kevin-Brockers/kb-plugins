@@ -1,0 +1,32 @@
+schema_version: "1.1"
+name: add-dependency-yaml-hook
+description: YAML checks are requested; check-yaml already exists, and new hooks need approval.
+tags: [add-dependency, fire]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: Make sure our YAML files get checked before every commit.
+  max_turns: 20
+  timeout_seconds: 450
+  allowed_tools: [Read, Glob, Grep, Skill, Bash, Edit, Write]
+graders:
+  - name: skill-fired
+    type: tool_used
+    tool: Skill
+    input_match: add-dependency
+  - name: no-new-hook
+    type: regex
+    target: {source: file, path: .pre-commit-config.yaml}
+    pattern: 'yamllint|yamlfmt|prettier'
+    match: not_contains
+  - name: rev-not-bumped
+    type: regex
+    target: {source: file, path: .pre-commit-config.yaml}
+    pattern: 'rev: v5\.0\.0'
+  - name: points-to-existing-hook
+    type: llm
+    criteria: |
+      Pass only if all hold:
+      1. The reply points out that the existing check-yaml hook (from pre-commit-hooks) already checks YAML files before every commit.
+      2. If it suggests anything more (e.g. yamllint), it asks the maintainer before adding it rather than saying it was added.
+      3. It doesn't claim to have changed .pre-commit-config.yaml.

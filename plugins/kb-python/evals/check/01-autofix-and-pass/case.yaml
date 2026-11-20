@@ -1,0 +1,45 @@
+schema_version: "1.1"
+name: check-autofix-and-pass
+description: An unused import and unformatted code; ruff fixes both, tests pass, the changed file is reported.
+tags: [check, fire]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: Check the project before I commit.
+  max_turns: 20
+  timeout_seconds: 450
+  allowed_tools: [Read, Glob, Grep, Skill, Bash]
+graders:
+  - name: skill-fired
+    type: tool_used
+    tool: Skill
+    input_match: kb-python:check
+  - name: lint-with-fix
+    type: tool_used
+    tool: Bash
+    input_match: 'ruff check[^"]*--fix'
+  - name: lint-before-format
+    type: tool_order
+    before: {tool: Bash, input_match: 'ruff check'}
+    after: {tool: Bash, input_match: 'ruff format(?! --check)'}
+  - name: format-before-tests
+    type: tool_order
+    before: {tool: Bash, input_match: 'ruff format(?! --check)'}
+    after: {tool: Bash, input_match: 'pytest'}
+  - name: import-removed
+    type: regex
+    target: {source: file, path: calc.py}
+    flags: m
+    pattern: '^import os$'
+    match: not_contains
+  - name: formatted
+    type: regex
+    target: {source: file, path: calc.py}
+    pattern: 'def add\(a: int, b: int\) -> int:\n    return a \+ b\n'
+  - name: report
+    type: llm
+    criteria: |
+      Pass only if all hold:
+      1. It reports that ruff check, ruff format and pytest all passed (2 tests).
+      2. It says calc.py was changed by ruff (the unused import removed and/or reformatted) so the maintainer can review and stage it.
+      3. It doesn't claim to have committed anything.

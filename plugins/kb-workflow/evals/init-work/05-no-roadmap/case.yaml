@@ -1,0 +1,27 @@
+schema_version: "1.1"
+name: init-work-no-roadmap
+description: The repo has no ROADMAP.md; nothing may be invented.
+tags: [init-work, fire]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: What's the next step on the roadmap for this repo?
+  max_turns: 15
+  timeout_seconds: 300
+  allowed_tools: [Read, Glob, Grep, Skill, Bash, Write]
+graders:
+  - name: skill-fired
+    type: tool_used
+    tool: Skill
+    input_match: init-work
+  - name: no-roadmap-written
+    type: file_exists
+    path: ROADMAP.md
+    exists: false
+  - name: report
+    type: llm
+    criteria: |
+      The repo has no ROADMAP.md (only README.md, AGENTS.md, CHANGELOG.md, check.sh and todo.py). Pass only if all hold:
+      1. The reply says there is no ROADMAP.md.
+      2. It does not present any roadmap step, milestone or step ID as if it came from a roadmap (suggesting ideas is fine only if clearly labeled as suggestions, not as the roadmap).
+      3. It offers to help write a roadmap or asks the maintainer what to work on.

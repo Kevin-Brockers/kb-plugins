@@ -1,0 +1,6 @@
+. "$(dirname "$0")/../../_lib/fixtures.sh"
+init_repo
+branch_from_dev feature/due_dates
+add_due_dates
+commit "Add optional due dates to todos" todo.py
+echo "# TODO: validate due dates" >> todo.py

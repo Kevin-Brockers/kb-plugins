@@ -1,0 +1,42 @@
+schema_version: "1.1"
+name: setup-repo-already-set-up
+description: Everything is in place; the skill should report and change nothing.
+tags: [setup-repo, fire]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: Is this repo fully set up for my workflow? Fix anything that's missing.
+  max_turns: 25
+  timeout_seconds: 600
+  allowed_tools: [Read, Glob, Grep, Skill, Bash, Edit, Write]
+graders:
+  - name: skill-fired
+    type: tool_used
+    tool: Skill
+    input_match: setup-repo
+  - name: no-new-files
+    type: regex
+    target: files
+    flags: m
+    pattern: '^(?!\.git/|\.claude/)\S'
+    match: 'count:0'
+  - name: no-edits
+    type: tool_used
+    tool: Edit
+    min: 0
+    max: 0
+    arm: both
+  - name: no-commit-or-push
+    type: tool_used
+    tool: Bash
+    input_match: 'git (commit|push)'
+    min: 0
+    max: 0
+    arm: both
+  - name: summary
+    type: llm
+    criteria: |
+      Pass only if all hold:
+      1. It says the repo, main and dev, the remote, .gitignore (with the secret patterns), .pre-commit-config.yaml and CHANGELOG.md are already in place.
+      2. It reports the prek hook state accurately: if prek isn't installed it says so and asks how to install it; if it is, it says whether `prek install` ran.
+      3. It doesn't claim to have changed any file.
