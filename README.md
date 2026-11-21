@@ -11,6 +11,12 @@ My shared working rules and the git/GitHub workflow around a `ROADMAP.md`.
 - **Core rules**: a `SessionStart` hook adds
   [`core-rules.md`](plugins/kb-workflow/hooks/core-rules.md) (working
   etiquette and hard rules) to every session.
+- **Caveman mode**: the same hook adds
+  [`caveman.md`](plugins/kb-workflow/hooks/caveman.md), so chat replies are
+  as short as possible (fragments, symbols, no filler) while files, commits,
+  PRs and the changelog stay in normal English. Say "normal mode" for a full
+  explanation; remove the file from the hook command in
+  [`hooks.json`](plugins/kb-workflow/hooks/hooks.json) to switch it off.
 - **Guard**: a `PreToolUse` hook ([`guard.py`](plugins/kb-workflow/hooks/guard.py),
   checks in [`guard_lib/`](plugins/kb-workflow/hooks/guard_lib)) on every
   Bash command and file edit. It looks inside `bash -c`, `eval` and `xargs`.
@@ -160,10 +166,11 @@ Install them with `prek install` (or `pre-commit install`):
   `.claude-plugin/` runs the plugin's whole suite. A changed skill or
   agent without an eval suite gets a warning.
 
-To keep commits fast, the hook runs 1 run per case, without the baseline
-arm, 4 at a time, keeps the report local, and fails if a case scores below
-0.8. Change this with `KB_EVALS_RUNS`, `KB_EVALS_ABLATION`,
-`KB_EVALS_CONCURRENCY` and `KB_EVALS_THRESHOLD`. See what it would run with
+To keep commits cheap, the hook runs
+[`scripts/run-evals-single.sh`](scripts/run-evals-single.sh) (1 run per
+case on Haiku, no baseline arm, 4 at a time, local report) and fails if a
+case scores below 0.8. Change this with `KB_EVALS_RUNS`, `KB_EVALS_MODEL`,
+`KB_EVALS_ABLATION`, `KB_EVALS_CONCURRENCY` and `KB_EVALS_THRESHOLD`. See what it would run with
 `KB_EVALS_DRY_RUN=1`. Skip it for one commit with
 `SKIP=plugin-evals git commit …`. Like the evals, the hook needs git from
 Homebrew on macOS.

@@ -10,10 +10,12 @@
 #   plugins/<p>/hooks/...,
 #   plugins/<p>/.claude-plugin/...    -> <p> (whole suite)
 #
-# The defaults keep a commit cheap: 1 run per case, no baseline arm, local
-# report only. Override them with environment variables:
+# It runs scripts/run-evals-single.sh, the cheapest tier: 1 run per case on
+# Haiku, no baseline arm, local report only. Override with environment
+# variables (each is passed only when set):
 #
-#   KB_EVALS_RUNS=3 KB_EVALS_ABLATION=with-without git commit ...
+#   KB_EVALS_RUNS=2 KB_EVALS_MODEL=sonnet git commit ...
+#   KB_EVALS_ABLATION=with-without KB_EVALS_CONCURRENCY=2 git commit ...
 #   KB_EVALS_DRY_RUN=1 scripts/eval-changed.sh plugins/kb-python/skills/check/SKILL.md
 #
 # Skip the hook for one commit with SKIP=plugin-evals git commit ...
@@ -21,10 +23,14 @@ set -euo pipefail
 set -f # the "*" tag below must not expand to file names
 
 root="$(cd "$(dirname "$0")/.." && pwd)"
-runs="${KB_EVALS_RUNS:-1}"
 threshold="${KB_EVALS_THRESHOLD:-0.8}"
-concurrency="${KB_EVALS_CONCURRENCY:-4}"
-ablation="${KB_EVALS_ABLATION:-none}"
+
+# Options for run-evals-single.sh; its own defaults apply unless overridden.
+common=(--trust-plugin --threshold "$threshold")
+[ -z "${KB_EVALS_RUNS:-}" ] || common+=(--runs "$KB_EVALS_RUNS")
+[ -z "${KB_EVALS_MODEL:-}" ] || common+=(--model "$KB_EVALS_MODEL")
+[ -z "${KB_EVALS_ABLATION:-}" ] || common+=(--ablation "$KB_EVALS_ABLATION")
+[ -z "${KB_EVALS_CONCURRENCY:-}" ] || common+=(--concurrency "$KB_EVALS_CONCURRENCY")
 
 # One "<plugin> <tag>" line per staged path; tag "*" means the whole suite.
 targets=""
@@ -56,8 +62,7 @@ for plugin in $(printf '%s' "$targets" | cut -d' ' -f1 | sort -u); do
   fi
 
   for tag in $tags; do
-    args=(--trust-plugin --no-publish --runs "$runs" --threshold "$threshold"
-      --concurrency "$concurrency" --ablation "$ablation")
+    args=("${common[@]}")
     if [ "$tag" = '*' ]; then
       label="$plugin"
     else
@@ -71,8 +76,8 @@ for plugin in $(printf '%s' "$targets" | cut -d' ' -f1 | sort -u); do
 
     echo "==> evals for $label"
     if [ -n "${KB_EVALS_DRY_RUN:-}" ]; then
-      echo "scripts/run-evals.sh $plugin ${args[*]}"
-    elif ! "$root/scripts/run-evals.sh" "$plugin" "${args[@]}"; then
+      echo "scripts/run-evals-single.sh $plugin ${args[*]}"
+    elif ! "$root/scripts/run-evals-single.sh" "$plugin" "${args[@]}"; then
       failed+=" $label"
     fi
   done

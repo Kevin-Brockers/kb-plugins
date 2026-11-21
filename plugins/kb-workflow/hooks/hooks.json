@@ -1,12 +1,12 @@
 {
-  "description": "Inject the kb-workflow core rules at session start and guard Bash and file edits: git/gh workflow rules, destructive commands, secrets",
+  "description": "Inject the kb-workflow core rules and caveman-style replies at session start and guard Bash and file edits: git/gh workflow rules, destructive commands, secrets",
   "hooks": {
     "SessionStart": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": "cat \"${CLAUDE_PLUGIN_ROOT}/hooks/core-rules.md\""
+            "command": "cat \"${CLAUDE_PLUGIN_ROOT}/hooks/core-rules.md\" \"${CLAUDE_PLUGIN_ROOT}/hooks/caveman.md\""
           }
         ]
       }

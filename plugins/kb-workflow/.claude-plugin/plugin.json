@@ -1,6 +1,6 @@
 {
   "name": "kb-workflow",
-  "description": "Shared working rules (injected at session start, enforced by a guard hook for git/gh rules, destructive commands, secrets and session IDs) and workflow skills: init-work, setup-repo, changelog-entry, add-dependency, open-pr, sync-dev, prepare-release",
+  "description": "Shared working rules and caveman-style terse replies (injected at session start, enforced by a guard hook for git/gh rules, destructive commands, secrets and session IDs) and workflow skills: init-work, setup-repo, changelog-entry, add-dependency, open-pr, sync-dev, prepare-release",
   "version": "0.1.0",
   "author": {
     "name": "Kevin-Brockers"
