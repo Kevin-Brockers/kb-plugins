@@ -27,4 +27,5 @@ exec claude plugin eval "$root/plugins/$plugin" \
   --scaffold \
   --allow-tools Bash Edit Write \
   --judge-model sonnet \
+  --no-publish
   "$@"
