@@ -105,23 +105,27 @@ empty sandbox: a todo-app repo with `main`, `dev`, a local bare `origin`,
 and whatever the case needs (`ROADMAP.md`, `CHANGELOG.md`, merged branches,
 a uv project, …). The shared helpers are in `evals/_lib/fixtures.sh`.
 
-Each skill has 4–5 cases where it should fire, covering the main path and
-the stop conditions (dirty tree, failing checks, missing files, no version
-given, …), and one near-miss prompt where it shouldn't fire. Graders check
-outcomes: file contents, commands run or never run (no `--force`, no push to
-`main`/`dev`, no unapproved `uv add`, …), and a Sonnet-judged rubric for the
-final report. Each case runs with and without the plugin, so the headline
-number is Δ, the uplift the plugin gives.
+Each skill has a case for the main path, where it should fire, and a
+near-miss prompt where it shouldn't. Graders check outcomes: file contents,
+commands run or never run (no `--force`, no push to `main`/`dev`, no
+unapproved `uv add`, …), and a judged rubric for the final report.
 
 ```bash
-scripts/run-evals.sh kb-workflow                      # whole suite, 3 runs per case
-scripts/run-evals.sh kb-workflow --tag sync-dev       # one skill
-scripts/run-evals.sh kb-python --runs 1 --no-publish  # quick pass, local report only
+scripts/run-evals.sh kb-workflow                                # whole suite, 2 runs per case
+scripts/run-evals.sh kb-workflow --tag sync-dev                 # one skill
+scripts/run-evals-single.sh kb-workflow                         # smoke check: 1 run per case, all Haiku
+scripts/run-evals-full.sh kb-workflow                           # full suite: 3 runs, with and without the plugin (uplift Δ)
 ```
 
+`run-evals-single.sh` is the cheapest option (one Haiku run per case) and only shows
+whether something is broken; one run is too noisy to trust the score.
+`run-evals-full.sh` costs about 3× as much; use it before a release or
+after larger skill changes.
+
 The script passes `--scaffold` (runs the case scripts),
-`--allow-tools Bash Edit Write` and `--judge-model sonnet`; other options go
-through to `claude plugin eval`. The first run asks you to trust the plugin
+`--allow-tools Bash Edit Write`, `--model sonnet`, `--judge-model haiku`, `--runs 2`,
+`--ablation none`, `--concurrency 4` and `--no-publish`; options you add go
+through to `claude plugin eval` and override these. The first run asks you to trust the plugin
 directory. Results go to `plugins/<plugin>/evals/results/` (gitignored).
 
 - **git on macOS**: the cases run git inside the eval's sandbox, which
