@@ -9,10 +9,7 @@ set -euo pipefail
 # A small uv project with ruff and pytest as dev dependencies, synced and
 # committed. The scaffold runs outside the agent's sandbox, so this is where
 # uv downloads the packages; the agent's `uv run` then works offline.
-# python_project [dev dependencies...]
 python_project() {
-  local deps='"pytest>=8", "ruff>=0.6"'
-  [ $# -eq 0 ] || deps="$*"
   git init -q -b main
   cat > pyproject.toml <<TOML
 [project]
@@ -23,7 +20,7 @@ requires-python = ">=3.9"
 dependencies = []
 
 [dependency-groups]
-dev = [$deps]
+dev = ["pytest>=8", "ruff>=0.6"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
