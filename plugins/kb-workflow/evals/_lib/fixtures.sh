@@ -66,19 +66,6 @@ if __name__ == "__main__":
 EOF
 }
 
-# Make check.sh fail with a test failure.
-failing_checks() {
-  cat > check.sh <<'EOF'
-#!/bin/sh
-# Stand-in for the project's lint, format and tests.
-echo "lint: ok"
-echo "format: ok"
-echo "tests: 11 passed, 1 failed"
-echo "FAILED tests/test_todo.py::test_due_date_is_optional - KeyError: 'due'"
-exit 1
-EOF
-}
-
 write_roadmap() {
   cat > ROADMAP.md <<'EOF'
 # Roadmap
